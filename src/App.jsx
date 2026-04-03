@@ -25,7 +25,7 @@ const initialForm = {
 };
 
 // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW (see setup guide)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykHgBx3TLQ5i2_wc6mM6THF2izuerJPW0jcB3N5zccVgCbnzSwjDi3iDpi-KBaxpaB/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvG8vqIiwrhV82cgzQ60bZLMQ9aJbKByNtaS9dev1Ev1Bnkrj4iOzhBQ-MNzt6ZA/exec";
 
 // Bank details
 const BANK = { name: "Access Bank", accountName: "Abdullahi Ahmad", accountNumber: "0098370178", dues: "500" };
