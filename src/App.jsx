@@ -1,0 +1,565 @@
+import { useState, useRef, useEffect } from "react";
+
+const SETS = [];
+for (let y = 2024; y >= 1970; y--) SETS.push(String(y));
+
+const STATES_NG = [
+  "Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno",
+  "Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","FCT","Gombe","Imo",
+  "Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa",
+  "Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba",
+  "Yobe","Zamfara"
+];
+
+const TOTAL_STEPS = 5;
+const stepTitles = ["Personal", "Location", "Work", "Payment", "Social"];
+const stepIcons = ["👤", "📍", "💼", "💳", "🌐"];
+
+const initialForm = {
+  firstName: "", lastName: "", middleName: "", email: "", phone: "", gender: "",
+  setYear: "2016", address: "", city: "", state: "", country: "Nigeria",
+  occupation: "", company: "", photo: null, photoPreview: null,
+  paymentProof: null, paymentProofPreview: null, paymentProofName: "",
+  facebook: "", linkedin: "", twitter: "", instagram: "",
+  achievements: "", interests: "", message: ""
+};
+
+// ⚠️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW (see setup guide)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykHgBx3TLQ5i2_wc6mM6THF2izuerJPW0jcB3N5zccVgCbnzSwjDi3iDpi-KBaxpaB/exec";
+
+// Bank details
+const BANK = { name: "Access Bank", accountName: "Abdullahi Ahmad", accountNumber: "0098370178", dues: "500" };
+
+export default function App() {
+  const [form, setForm] = useState(initialForm);
+  const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [animate, setAnimate] = useState(true);
+  const [copied, setCopied] = useState("");
+  const fileRef = useRef();
+  const proofRef = useRef();
+
+  useEffect(() => {
+    setAnimate(true);
+    const t = setTimeout(() => setAnimate(false), 400);
+    return () => clearTimeout(t);
+  }, [step]);
+
+  const set = (field) => (e) => {
+    setForm((f) => ({ ...f, [field]: e.target.value }));
+    setErrors((er) => ({ ...er, [field]: undefined }));
+  };
+
+  const handlePhoto = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) =>
+        setForm((f) => ({ ...f, photo: file, photoPreview: ev.target.result }));
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProof = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) =>
+        setForm((f) => ({ ...f, paymentProof: file, paymentProofPreview: ev.target.result, paymentProofName: file.name }));
+      reader.readAsDataURL(file);
+      setErrors((er) => ({ ...er, paymentProof: undefined }));
+    }
+  };
+
+  const copyText = (text, label) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(label);
+      setTimeout(() => setCopied(""), 1500);
+    });
+  };
+
+  const validate = () => {
+    const e = {};
+    if (step === 0) {
+      if (!form.firstName.trim()) e.firstName = "Required";
+      if (!form.lastName.trim()) e.lastName = "Required";
+      if (!form.email.trim()) e.email = "Required";
+      else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email";
+      if (!form.phone.trim()) e.phone = "Required";
+      if (!form.gender) e.gender = "Required";
+    }
+    if (step === 1) {
+      if (!form.address.trim()) e.address = "Required";
+      if (!form.city.trim()) e.city = "Required";
+      if (!form.state) e.state = "Required";
+    }
+    if (step === 3) {
+      if (!form.paymentProofPreview) e.paymentProof = "Please upload your proof of payment";
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const next = () => { if (validate()) setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1)); };
+  const prev = () => setStep((s) => Math.max(s - 1, 0));
+
+  const submit = async () => {
+    if (!validate()) return;
+    setSubmitting(true);
+    setSubmitError("");
+
+    const payload = {
+      timestamp: new Date().toLocaleString(),
+      firstName: form.firstName,
+      lastName: form.lastName,
+      middleName: form.middleName,
+      email: form.email,
+      phone: form.phone,
+      gender: form.gender,
+      setYear: form.setYear,
+      address: form.address,
+      city: form.city,
+      state: form.state,
+      country: form.country,
+      occupation: form.occupation,
+      company: form.company,
+      achievements: form.achievements,
+      interests: form.interests,
+      paymentProof: form.paymentProofPreview || "",
+      paymentProofName: form.paymentProofName || "",
+      facebook: form.facebook,
+      linkedin: form.linkedin,
+      twitter: form.twitter,
+      instagram: form.instagram,
+      message: form.message,
+    };
+
+    try {
+      if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+        await new Promise((r) => setTimeout(r, 1500));
+      } else {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError("Submission failed. Please check your internet and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.successCard}>
+          <div style={styles.successIcon}>✅</div>
+          <h1 style={styles.successTitle}>Registration Successful!</h1>
+          <p style={styles.successText}>
+            Welcome back, <strong>{form.firstName} {form.lastName}</strong>!<br />
+            You're registered as a proud old boy of<br />
+            <strong>Science Secondary School, Lautai Gumel</strong> — Set of {form.setYear}.
+          </p>
+          <p style={{ ...styles.successText, opacity: 0.7, fontSize: 14, marginTop: 8 }}>
+            Your payment proof has been received and will be verified shortly.<br />
+            A confirmation will be sent to <strong>{form.email}</strong>.
+          </p>
+          <button style={styles.btnPrimary} onClick={() => { setSubmitted(false); setForm(initialForm); setStep(0); }}>
+            Register Another Member
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.page}>
+      <header style={styles.header}>
+        <img src="/logo.jpg" alt="School Logo" style={styles.logo} />
+        <h1 style={styles.schoolName}>Science Secondary School</h1>
+        <p style={styles.schoolSub}>Lautai, Gumel — Old Boys Registration Form 2016 Graduate</p>
+      </header>
+
+      {/* Stepper */}
+      <div style={styles.stepper}>
+        {stepTitles.map((t, i) => (
+          <div key={i} style={styles.stepItem} onClick={() => { if (i < step) setStep(i); }}>
+            <div style={{
+              ...styles.stepCircle,
+              ...(i === step ? styles.stepActive : {}),
+              ...(i < step ? styles.stepDone : {}),
+            }}>
+              {i < step ? "✓" : stepIcons[i]}
+            </div>
+            <span style={{
+              ...styles.stepLabel,
+              fontWeight: i === step ? 700 : 400,
+              color: i <= step ? "#1a3a2a" : "#999",
+            }}>{t}</span>
+          </div>
+        ))}
+        <div style={styles.stepLine}>
+          <div style={{ ...styles.stepLineInner, width: `${(step / (TOTAL_STEPS - 1)) * 100}%` }} />
+        </div>
+      </div>
+
+      {/* Form Card */}
+      <div style={{ ...styles.card, opacity: animate ? 0 : 1, transform: animate ? "translateY(16px)" : "none", transition: "all 0.4s ease" }}>
+
+        {/* Step 0: Personal */}
+        {step === 0 && (
+          <>
+            <h2 style={styles.sectionTitle}>Personal Information</h2>
+            <div style={styles.row}>
+              <Field label="First Name *" value={form.firstName} onChange={set("firstName")} error={errors.firstName} placeholder="e.g. Abdullahi" />
+              <Field label="Last Name *" value={form.lastName} onChange={set("lastName")} error={errors.lastName} placeholder="e.g. Bello" />
+            </div>
+            <Field label="Middle Name" value={form.middleName} onChange={set("middleName")} placeholder="Optional" />
+            <div style={styles.row}>
+              <Field label="Email Address *" type="email" value={form.email} onChange={set("email")} error={errors.email} placeholder="you@email.com" />
+              <Field label="Phone Number *" type="tel" value={form.phone} onChange={set("phone")} error={errors.phone} placeholder="+234..." />
+            </div>
+            <div style={styles.row}>
+              <SelectField label="Gender *" value={form.gender} onChange={set("gender")} error={errors.gender} options={["Male", "Female"]} placeholder="Select gender" />
+            </div>
+            <label style={styles.label}>Passport Photo</label>
+            <div style={styles.photoRow} onClick={() => fileRef.current?.click()}>
+              {form.photoPreview ? (
+                <img src={form.photoPreview} alt="preview" style={styles.photoPreview} />
+              ) : (
+                <div style={styles.photoPlaceholder}>
+                  <span style={{ fontSize: 28 }}>📷</span>
+                  <span style={{ fontSize: 13, color: "#888" }}>Click to upload</span>
+                </div>
+              )}
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhoto} />
+            </div>
+          </>
+        )}
+
+        {/* Step 1: Location */}
+        {step === 1 && (
+          <>
+            <h2 style={styles.sectionTitle}>Contact & Location</h2>
+            <Field label="Residential Address *" value={form.address} onChange={set("address")} error={errors.address} placeholder="House / Street" />
+            <div style={styles.row}>
+              <Field label="City *" value={form.city} onChange={set("city")} error={errors.city} placeholder="e.g. Gumel" />
+              <SelectField label="State *" value={form.state} onChange={set("state")} error={errors.state} options={STATES_NG} placeholder="Select state" />
+            </div>
+            <Field label="Country" value={form.country} onChange={set("country")} placeholder="Nigeria" />
+          </>
+        )}
+
+        {/* Step 2: Work */}
+        {step === 2 && (
+          <>
+            <h2 style={styles.sectionTitle}>Professional Details</h2>
+            <div style={styles.row}>
+              <Field label="Occupation" value={form.occupation} onChange={set("occupation")} placeholder="e.g. Engineer, Teacher" />
+              <Field label="Organisation / Company" value={form.company} onChange={set("company")} placeholder="e.g. NNPC" />
+            </div>
+            <label style={styles.label}>Notable Achievements</label>
+            <textarea style={styles.textarea} value={form.achievements} onChange={set("achievements")} placeholder="Awards, positions, contributions..." rows={3} />
+            <label style={styles.label}>Interests / Hobbies</label>
+            <textarea style={styles.textarea} value={form.interests} onChange={set("interests")} placeholder="Football, reading, community service..." rows={2} />
+          </>
+        )}
+
+        {/* Step 3: PAYMENT */}
+        {step === 3 && (
+          <>
+            <h2 style={styles.sectionTitle}>Dues Payment</h2>
+
+            {/* Dues Amount Banner */}
+            <div style={styles.duesBox}>
+              <span style={styles.duesLabel}>Registration Dues</span>
+              <span style={styles.duesAmount}>₦{Number(BANK.dues).toLocaleString()}</span>
+            </div>
+
+            {/* Bank Details Card */}
+            <div style={styles.bankCard}>
+              <div style={styles.bankHeader}>
+                <span style={{ fontSize: 22 }}>🏦</span>
+                <span style={styles.bankTitle}>Transfer to this account</span>
+              </div>
+              <div style={styles.bankRow}>
+                <span style={styles.bankLabel}>Bank Name</span>
+                <div style={styles.bankValueRow}>
+                  <span style={styles.bankValue}>{BANK.name}</span>
+                </div>
+              </div>
+              <div style={styles.bankDivider} />
+              <div style={styles.bankRow}>
+                <span style={styles.bankLabel}>Account Name</span>
+                <div style={styles.bankValueRow}>
+                  <span style={styles.bankValue}>{BANK.accountName}</span>
+                </div>
+              </div>
+              <div style={styles.bankDivider} />
+              <div style={styles.bankRow}>
+                <span style={styles.bankLabel}>Account Number</span>
+                <div style={styles.bankValueRow}>
+                  <span style={{ ...styles.bankValue, fontFamily: "'Courier New', monospace", fontSize: 20, letterSpacing: 2 }}>{BANK.accountNumber}</span>
+                  <button
+                    style={{ ...styles.copyBtn, color: copied === "acct" ? "#27ae60" : "#d4af37" }}
+                    onClick={() => copyText(BANK.accountNumber, "acct")}
+                  >
+                    {copied === "acct" ? "Copied ✓" : "Copy"}
+                  </button>
+                </div>
+              </div>
+              <div style={styles.bankDivider} />
+              <div style={styles.bankRow}>
+                <span style={styles.bankLabel}>Amount to Pay</span>
+                <div style={styles.bankValueRow}>
+                  <span style={{ ...styles.bankValue, color: "#d4af37", fontWeight: 800 }}>₦{Number(BANK.dues).toLocaleString()}.00</span>
+                  <button
+                    style={{ ...styles.copyBtn, color: copied === "amt" ? "#27ae60" : "#d4af37" }}
+                    onClick={() => copyText(BANK.dues, "amt")}
+                  >
+                    {copied === "amt" ? "Copied ✓" : "Copy"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p style={styles.payNote}>
+              After making the transfer, please upload a screenshot or photo of your payment receipt below.
+            </p>
+
+            {/* Proof of Payment Upload */}
+            <label style={styles.label}>Proof of Payment *</label>
+            <div
+              style={{
+                ...styles.proofUpload,
+                borderColor: errors.paymentProof ? "#c0392b" : form.paymentProofPreview ? "#27ae60" : "#b8c8be",
+                background: errors.paymentProof ? "#fdf2f2" : form.paymentProofPreview ? "#f0faf4" : "#f5f8f6",
+              }}
+              onClick={() => proofRef.current?.click()}
+            >
+              {form.paymentProofPreview ? (
+                <div style={styles.proofDone}>
+                  <img src={form.paymentProofPreview} alt="proof" style={styles.proofThumb} />
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1a3a2a" }}>✅ Proof uploaded</div>
+                    <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{form.paymentProofName}</div>
+                    <div style={{ fontSize: 12, color: "#d4af37", marginTop: 4, cursor: "pointer" }}>Tap to change</div>
+                  </div>
+                </div>
+              ) : (
+                <div style={styles.proofEmpty}>
+                  <span style={{ fontSize: 36 }}>📤</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#3a5a4a" }}>Upload Payment Receipt</span>
+                  <span style={{ fontSize: 12, color: "#888" }}>Screenshot, photo, or bank slip</span>
+                </div>
+              )}
+              <input ref={proofRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleProof} />
+            </div>
+            {errors.paymentProof && <span style={styles.errText}>{errors.paymentProof}</span>}
+          </>
+        )}
+
+        {/* Step 4: Social */}
+        {step === 4 && (
+          <>
+            <h2 style={styles.sectionTitle}>Social & Final Info</h2>
+            <div style={styles.row}>
+              <Field label="Facebook" value={form.facebook} onChange={set("facebook")} placeholder="facebook.com/yourname" />
+              <Field label="LinkedIn" value={form.linkedin} onChange={set("linkedin")} placeholder="linkedin.com/in/yourname" />
+            </div>
+            <div style={styles.row}>
+              <Field label="Twitter / X" value={form.twitter} onChange={set("twitter")} placeholder="@handle" />
+              <Field label="Instagram" value={form.instagram} onChange={set("instagram")} placeholder="@handle" />
+            </div>
+            <label style={styles.label}>Message to Fellow Old Boys</label>
+            <textarea style={styles.textarea} value={form.message} onChange={set("message")} placeholder="Say something to the community..." rows={3} />
+          </>
+        )}
+
+        {/* Navigation */}
+        <div style={styles.nav}>
+          {step > 0 && (
+            <button style={styles.btnSecondary} onClick={prev}>← Back</button>
+          )}
+          <div style={{ flex: 1 }} />
+          {step < TOTAL_STEPS - 1 ? (
+            <button style={styles.btnPrimary} onClick={next}>Continue →</button>
+          ) : (
+            <button style={{ ...styles.btnSubmit, opacity: submitting ? 0.6 : 1 }} onClick={submit} disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit Registration ✓"}
+            </button>
+          )}
+        </div>
+        {submitError && <p style={{ color: "#c0392b", fontSize: 13, marginTop: 10, fontFamily: "'DM Sans', sans-serif" }}>{submitError}</p>}
+      </div>
+
+      <footer style={styles.footer}>
+        © {new Date().getFullYear()} Science Secondary School Old Boys Association, Lautai Gumel
+      </footer>
+    </div>
+  );
+}
+
+function Field({ label, value, onChange, error, placeholder, type = "text" }) {
+  return (
+    <div style={{ flex: 1, minWidth: 180 }}>
+      <label style={styles.label}>{label}</label>
+      <input
+        type={type}
+        style={{ ...styles.input, ...(error ? styles.inputError : {}) }}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+      />
+      {error && <span style={styles.errText}>{error}</span>}
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, error, options, placeholder }) {
+  return (
+    <div style={{ flex: 1, minWidth: 180 }}>
+      <label style={styles.label}>{label}</label>
+      <select style={{ ...styles.input, ...styles.select, ...(error ? styles.inputError : {}), color: value ? "#1a3a2a" : "#999" }} value={value} onChange={onChange}>
+        <option value="">{placeholder}</option>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      {error && <span style={styles.errText}>{error}</span>}
+    </div>
+  );
+}
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(160deg, #0d2b1a 0%, #14422a 40%, #1a5c38 100%)",
+    fontFamily: "'Merriweather', 'Georgia', serif",
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "24px 16px 40px",
+  },
+  header: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 28, textAlign: "center" },
+  logo: {
+    maxWidth: 120, height: "auto", marginBottom: 12,
+  },
+  crest: {
+    fontSize: 48, width: 72, height: 72, background: "rgba(255,255,255,0.12)",
+    borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+    border: "2px solid rgba(212,175,55,0.5)", flexShrink: 0,
+  },
+  schoolName: {
+    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 22, fontWeight: 800,
+    color: "#d4af37", margin: 0, letterSpacing: 0.5, lineHeight: 1.2,
+  },
+  schoolSub: {
+    fontSize: 13, color: "rgba(255,255,255,0.7)", margin: "4px 0 0",
+    fontFamily: "'DM Sans', sans-serif", letterSpacing: 1, textTransform: "uppercase",
+  },
+  stepper: {
+    display: "flex", justifyContent: "center", gap: 14, marginBottom: 24,
+    position: "relative", padding: "0 4px", flexWrap: "wrap",
+  },
+  stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 5, zIndex: 1, cursor: "pointer" },
+  stepCircle: {
+    width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.1)",
+    border: "2px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center",
+    justifyContent: "center", fontSize: 15, color: "#aaa", transition: "all 0.3s",
+  },
+  stepActive: { background: "#d4af37", border: "2px solid #d4af37", color: "#1a3a2a", boxShadow: "0 0 18px rgba(212,175,55,0.4)" },
+  stepDone: { background: "rgba(212,175,55,0.2)", border: "2px solid #d4af37", color: "#d4af37" },
+  stepLabel: { fontSize: 9, color: "#ccc", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 },
+  stepLine: { position: "absolute", top: 18, left: "8%", right: "8%", height: 2, background: "rgba(255,255,255,0.1)", zIndex: 0 },
+  stepLineInner: { height: "100%", background: "#d4af37", transition: "width 0.5s ease", borderRadius: 2 },
+  card: {
+    width: "100%", maxWidth: 580, background: "rgba(255,255,255,0.97)",
+    borderRadius: 16, padding: "32px 28px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.35)", transition: "all 0.4s ease",
+  },
+  sectionTitle: {
+    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 20, fontWeight: 700,
+    color: "#1a3a2a", marginBottom: 20, paddingBottom: 10, borderBottom: "2px solid #d4af37",
+  },
+  row: { display: "flex", gap: 14, flexWrap: "wrap" },
+  label: {
+    display: "block", fontSize: 12, fontWeight: 600, color: "#3a5a4a", marginTop: 14, marginBottom: 5,
+    fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.6,
+  },
+  input: {
+    width: "100%", padding: "11px 14px", border: "1.5px solid #d0d8d3", borderRadius: 8,
+    fontSize: 15, fontFamily: "'DM Sans', 'Merriweather', serif", color: "#1a3a2a",
+    background: "#f8faf9", outline: "none", transition: "border 0.2s", boxSizing: "border-box",
+  },
+  inputError: { borderColor: "#c0392b", background: "#fdf2f2" },
+  select: {
+    appearance: "none", cursor: "pointer",
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E")`,
+    backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center",
+  },
+  textarea: {
+    width: "100%", padding: "11px 14px", border: "1.5px solid #d0d8d3", borderRadius: 8,
+    fontSize: 15, fontFamily: "'DM Sans', 'Merriweather', serif", color: "#1a3a2a",
+    background: "#f8faf9", outline: "none", resize: "vertical", boxSizing: "border-box",
+  },
+  errText: { fontSize: 11, color: "#c0392b", marginTop: 3, display: "block", fontFamily: "'DM Sans', sans-serif" },
+  photoRow: { display: "inline-flex", cursor: "pointer", marginTop: 4 },
+  photoPlaceholder: {
+    width: 100, height: 110, background: "#eef3f0", border: "2px dashed #b8c8be",
+    borderRadius: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+  },
+  photoPreview: { width: 100, height: 110, objectFit: "cover", borderRadius: 10, border: "2px solid #d4af37" },
+
+  /* Payment styles */
+  duesBox: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    background: "linear-gradient(135deg, #1a5c38, #14422a)", borderRadius: 12, padding: "18px 22px", marginBottom: 20,
+  },
+  duesLabel: { fontSize: 14, color: "rgba(255,255,255,0.85)", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 },
+  duesAmount: { fontSize: 32, fontWeight: 900, color: "#d4af37", fontFamily: "'Playfair Display', serif" },
+  bankCard: { border: "1.5px solid #d0d8d3", borderRadius: 12, padding: 20, background: "#fafcfb", marginBottom: 16 },
+  bankHeader: { display: "flex", alignItems: "center", gap: 10, marginBottom: 16 },
+  bankTitle: { fontSize: 15, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif" },
+  bankRow: { padding: "8px 0" },
+  bankLabel: { fontSize: 11, color: "#888", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.8, display: "block", marginBottom: 4 },
+  bankValueRow: { display: "flex", alignItems: "center", justifyContent: "space-between" },
+  bankValue: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif" },
+  bankDivider: { height: 1, background: "#e8ede9" },
+  copyBtn: {
+    background: "none", border: "1px solid #d4af37", borderRadius: 6, padding: "4px 12px",
+    fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+  },
+  payNote: { fontSize: 13, color: "#666", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, margin: "12px 0 4px" },
+  proofUpload: { border: "2px dashed #b8c8be", borderRadius: 12, padding: 20, cursor: "pointer", transition: "all 0.2s", marginTop: 4 },
+  proofEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "10px 0" },
+  proofDone: { display: "flex", alignItems: "center", gap: 16 },
+  proofThumb: { width: 64, height: 64, objectFit: "cover", borderRadius: 8, border: "2px solid #27ae60" },
+
+  nav: { display: "flex", alignItems: "center", marginTop: 28, gap: 12 },
+  btnPrimary: {
+    padding: "12px 28px", background: "linear-gradient(135deg, #1a5c38, #14422a)",
+    color: "#d4af37", fontWeight: 700, fontSize: 15, border: "none", borderRadius: 10,
+    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+  },
+  btnSecondary: {
+    padding: "12px 22px", background: "transparent", color: "#1a5c38", fontWeight: 600,
+    fontSize: 14, border: "1.5px solid #1a5c38", borderRadius: 10, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+  },
+  btnSubmit: {
+    padding: "14px 32px", background: "linear-gradient(135deg, #d4af37, #b8942e)",
+    color: "#1a3a2a", fontWeight: 800, fontSize: 16, border: "none", borderRadius: 10,
+    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 4px 18px rgba(212,175,55,0.4)",
+  },
+  successCard: {
+    maxWidth: 480, background: "rgba(255,255,255,0.97)", borderRadius: 20,
+    padding: "48px 36px", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.35)", marginTop: 40,
+  },
+  successIcon: { fontSize: 56, marginBottom: 12 },
+  successTitle: { fontFamily: "'Playfair Display', serif", fontSize: 26, color: "#1a3a2a", margin: "0 0 12px" },
+  successText: { fontSize: 15, color: "#3a5a4a", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" },
+  footer: { marginTop: 32, fontSize: 12, color: "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", textAlign: "center" },
+};
