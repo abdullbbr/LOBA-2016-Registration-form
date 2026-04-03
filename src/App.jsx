@@ -30,6 +30,33 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvG8vqIiwrhV
 // Bank details
 const BANK = { name: "Access Bank", accountName: "Abdullahi Ahmad", accountNumber: "0098370178", dues: "500" };
 
+// Image compression utility
+const compressImage = (file, callback, quality = 0.7, maxWidth = 800, maxHeight = 600) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = (e) => {
+    const img = new Image();
+    img.src = e.target.result;
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let { width, height } = img;
+      if (width > height) {
+        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+      } else {
+        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        const compressedFile = new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() });
+        callback(compressedFile, canvas.toDataURL("image/jpeg", quality));
+      }, "image/jpeg", quality);
+    };
+  };
+};
+
 export default function App() {
   const [form, setForm] = useState(initialForm);
   const [step, setStep] = useState(0);
@@ -39,8 +66,13 @@ export default function App() {
   const [submitError, setSubmitError] = useState("");
   const [animate, setAnimate] = useState(true);
   const [copied, setCopied] = useState("");
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [darkMode, setDarkMode] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
   const fileRef = useRef();
   const proofRef = useRef();
+  const autoSaveTimer = useRef(null);
 
   useEffect(() => {
     setAnimate(true);
@@ -48,29 +80,75 @@ export default function App() {
     return () => clearTimeout(t);
   }, [step]);
 
+  // Show toast notification
+  const showToast = (message, type = "success", duration = 3000) => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), duration);
+  };
+
+  // Auto-save form to localStorage
+  useEffect(() => {
+    clearTimeout(autoSaveTimer.current);
+    if (unsavedChanges) {
+      autoSaveTimer.current = setTimeout(() => {
+        setAutoSaving(true);
+        localStorage.setItem("lobForm", JSON.stringify(form));
+        setAutoSaving(false);
+        setUnsavedChanges(false);
+      }, 2000);
+    }
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [unsavedChanges, form]);
+
+  // Load form from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("lobForm");
+    if (saved) {
+      try {
+        setForm(JSON.parse(saved));
+      } catch (e) {
+        console.error("Error loading saved form", e);
+      }
+    }
+  }, []);
+
   const set = (field) => (e) => {
-    setForm((f) => ({ ...f, [field]: e.target.value }));
+    let value = e.target.value;
+    // Email sanitization
+    if (field === "email") value = value.trim();
+    setForm((f) => ({ ...f, [field]: value }));
     setErrors((er) => ({ ...er, [field]: undefined }));
+    setUnsavedChanges(true);
   };
 
   const handlePhoto = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) =>
-        setForm((f) => ({ ...f, photo: file, photoPreview: ev.target.result }));
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Image must be smaller than 5MB", "error");
+        return;
+      }
+      compressImage(file, (compressedFile, preview) => {
+        setForm((f) => ({ ...f, photo: compressedFile, photoPreview: preview }));
+        setUnsavedChanges(true);
+        showToast("Photo uploaded and compressed", "success");
+      });
     }
   };
 
   const handleProof = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) =>
-        setForm((f) => ({ ...f, paymentProof: file, paymentProofPreview: ev.target.result, paymentProofName: file.name }));
-      reader.readAsDataURL(file);
-      setErrors((er) => ({ ...er, paymentProof: undefined }));
+      if (file.size > 10 * 1024 * 1024) {
+        showToast("Receipt image must be smaller than 10MB", "error");
+        return;
+      }
+      compressImage(file, (compressedFile, preview) => {
+        setForm((f) => ({ ...f, paymentProof: compressedFile, paymentProofPreview: preview, paymentProofName: file.name }));
+        setErrors((er) => ({ ...er, paymentProof: undefined }));
+        setUnsavedChanges(true);
+        showToast("Receipt uploaded and compressed", "success");
+      }, 0.8);
     }
   };
 
@@ -107,7 +185,11 @@ export default function App() {
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      showToast("Please fill all required fields", "error");
+      return;
+    }
+    if (submitting) return; // Prevent duplicate submissions
     setSubmitting(true);
     setSubmitError("");
 
@@ -149,8 +231,12 @@ export default function App() {
         });
       }
       setSubmitted(true);
+      localStorage.removeItem("lobForm");
+      showToast("Registration submitted successfully!", "success");
     } catch (err) {
-      setSubmitError("Submission failed. Please check your internet and try again.");
+      const errorMsg = "Submission failed. Please check your internet and try again.";
+      setSubmitError(errorMsg);
+      showToast(errorMsg, "error", 5000);
     } finally {
       setSubmitting(false);
     }
@@ -163,7 +249,7 @@ export default function App() {
           <div style={styles.successIcon}>✅</div>
           <h1 style={styles.successTitle}>Registration Successful!</h1>
           <p style={styles.successText}>
-            Welcome back, <strong>{form.firstName} {form.lastName}</strong>!<br />
+            Thank You , <strong>{form.firstName} {form.lastName}</strong>!<br />
             You're registered as a proud old boy of<br />
             <strong>Science Secondary School, Lautai Gumel</strong> — Set of {form.setYear}.
           </p>
@@ -180,9 +266,35 @@ export default function App() {
   }
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <img src="/logo.jpg" alt="School Logo" style={styles.logo} />
+    <div style={{ ...styles.page, ...(darkMode ? styles.pageDark : {}) }}>
+      {/* Toast Notification */}
+      {toast.show && (
+        <div style={{
+          ...styles.toast,
+          background: toast.type === "error" ? "#c0392b" : "#27ae60",
+        }}>
+          <span style={{ marginRight: 10 }}>{toast.type === "error" ? "❌" : "✅"}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* Auto-save Indicator */}
+      {autoSaving && (
+        <div style={styles.autoSaveIndicator}>💾 Saving...</div>
+      )}
+
+      <header style={{ ...styles.header, ...(darkMode ? styles.headerDark : {}) }}>
+        <div style={styles.headerTop}>
+          <img src="/logo.jpg" alt="School Logo" style={styles.logo} />
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            style={styles.darkModeToggle}
+            aria-label="Toggle dark mode"
+            title="Toggle dark mode"
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+        </div>
         <h1 style={styles.schoolName}>Science Secondary School</h1>
         <p style={styles.schoolSub}>Lautai, Gumel — Old Boys Registration Form 2016 Graduate</p>
       </header>
@@ -218,16 +330,16 @@ export default function App() {
           <>
             <h2 style={styles.sectionTitle}>Personal Information</h2>
             <div style={styles.row}>
-              <Field label="First Name *" value={form.firstName} onChange={set("firstName")} error={errors.firstName} placeholder="e.g. Abdullahi" />
-              <Field label="Last Name *" value={form.lastName} onChange={set("lastName")} error={errors.lastName} placeholder="e.g. Bello" />
+              <Field label="First Name *" value={form.firstName} onChange={set("firstName")} error={errors.firstName} placeholder="e.g. Abdullahi" aria-required="true" />
+              <Field label="Last Name *" value={form.lastName} onChange={set("lastName")} error={errors.lastName} placeholder="e.g. Bello" aria-required="true" />
             </div>
             <Field label="Middle Name" value={form.middleName} onChange={set("middleName")} placeholder="Optional" />
             <div style={styles.row}>
-              <Field label="Email Address *" type="email" value={form.email} onChange={set("email")} error={errors.email} placeholder="you@email.com" />
-              <Field label="Phone Number *" type="tel" value={form.phone} onChange={set("phone")} error={errors.phone} placeholder="+234..." />
+              <Field label="Email Address *" type="email" value={form.email} onChange={set("email")} error={errors.email} placeholder="you@email.com" aria-required="true" />
+              <Field label="Phone Number *" type="tel" value={form.phone} onChange={set("phone")} error={errors.phone} placeholder="+234..." aria-required="true" />
             </div>
             <div style={styles.row}>
-              <SelectField label="Gender *" value={form.gender} onChange={set("gender")} error={errors.gender} options={["Male", "Female"]} placeholder="Select gender" />
+              <SelectField label="Gender *" value={form.gender} onChange={set("gender")} error={errors.gender} options={["Male", "Female"]} placeholder="Select gender" aria-required="true" />
             </div>
             <label style={styles.label}>Passport Photo</label>
             <div style={styles.photoRow} onClick={() => fileRef.current?.click()}>
@@ -250,8 +362,8 @@ export default function App() {
             <h2 style={styles.sectionTitle}>Contact & Location</h2>
             <Field label="Residential Address *" value={form.address} onChange={set("address")} error={errors.address} placeholder="House / Street" />
             <div style={styles.row}>
-              <Field label="City *" value={form.city} onChange={set("city")} error={errors.city} placeholder="e.g. Gumel" />
-              <SelectField label="State *" value={form.state} onChange={set("state")} error={errors.state} options={STATES_NG} placeholder="Select state" />
+              <Field label="City *" value={form.city} onChange={set("city")} error={errors.city} placeholder="e.g. Gumel" aria-required="true" />
+              <SelectField label="State *" value={form.state} onChange={set("state")} error={errors.state} options={STATES_NG} placeholder="Select state" aria-required="true" />
             </div>
             <Field label="Country" value={form.country} onChange={set("country")} placeholder="Nigeria" />
           </>
@@ -386,14 +498,21 @@ export default function App() {
         {/* Navigation */}
         <div style={styles.nav}>
           {step > 0 && (
-            <button style={styles.btnSecondary} onClick={prev}>← Back</button>
+            <button style={styles.btnSecondary} onClick={prev} aria-label="Go to previous step">← Back</button>
           )}
           <div style={{ flex: 1 }} />
+          {unsavedChanges && <span style={styles.unsavedIndicator} title="Unsaved changes">●</span>}
           {step < TOTAL_STEPS - 1 ? (
-            <button style={styles.btnPrimary} onClick={next}>Continue →</button>
+            <button style={styles.btnPrimary} onClick={next} aria-label={`Go to ${stepTitles[step + 1]} step`}>Continue →</button>
           ) : (
-            <button style={{ ...styles.btnSubmit, opacity: submitting ? 0.6 : 1 }} onClick={submit} disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit Registration ✓"}
+            <button 
+              style={{ ...styles.btnSubmit, opacity: submitting ? 0.6 : 1, cursor: submitting ? "not-allowed" : "pointer" }} 
+              onClick={submit} 
+              disabled={submitting}
+              aria-label="Submit registration"
+              aria-busy={submitting}
+            >
+              {submitting ? "🔄 Submitting..." : "✓ Submit Registration"}
             </button>
           )}
         </div>
@@ -407,31 +526,45 @@ export default function App() {
   );
 }
 
-function Field({ label, value, onChange, error, placeholder, type = "text" }) {
+function Field({ label, value, onChange, error, placeholder, type = "text", ...props }) {
+  const inputId = `field-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div style={{ flex: 1, minWidth: 180 }}>
-      <label style={styles.label}>{label}</label>
+      <label htmlFor={inputId} style={styles.label}>{label}</label>
       <input
+        id={inputId}
         type={type}
         style={{ ...styles.input, ...(error ? styles.inputError : {}) }}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${inputId}-error` : undefined}
+        {...props}
       />
-      {error && <span style={styles.errText}>{error}</span>}
+      {error && <span id={`${inputId}-error`} style={styles.errText} role="alert">{error}</span>}
     </div>
   );
 }
 
-function SelectField({ label, value, onChange, error, options, placeholder }) {
+function SelectField({ label, value, onChange, error, options, placeholder, ...props }) {
+  const selectId = `select-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div style={{ flex: 1, minWidth: 180 }}>
-      <label style={styles.label}>{label}</label>
-      <select style={{ ...styles.input, ...styles.select, ...(error ? styles.inputError : {}), color: value ? "#1a3a2a" : "#999" }} value={value} onChange={onChange}>
+      <label htmlFor={selectId} style={styles.label}>{label}</label>
+      <select 
+        id={selectId}
+        style={{ ...styles.input, ...styles.select, ...(error ? styles.inputError : {}), color: value ? "#1a3a2a" : "#999" }} 
+        value={value} 
+        onChange={onChange}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${selectId}-error` : undefined}
+        {...props}
+      >
         <option value="">{placeholder}</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
-      {error && <span style={styles.errText}>{error}</span>}
+      {error && <span id={`${selectId}-error`} style={styles.errText} role="alert">{error}</span>}
     </div>
   );
 }
@@ -443,8 +576,38 @@ const styles = {
     fontFamily: "'Merriweather', 'Georgia', serif",
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "24px 16px 40px",
+    transition: "background 0.3s ease",
   },
-  header: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 28, textAlign: "center" },
+  pageDark: {
+    background: "linear-gradient(160deg, #0a1f14 0%, #0d2a1a 40%, #111f17 100%)",
+  },
+  toast: {
+    position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",
+    padding: "14px 24px", borderRadius: 12, color: "white",
+    display: "flex", alignItems: "center", zIndex: 9999,
+    boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+    fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+    animation: "slideDown 0.3s ease",
+  },
+  autoSaveIndicator: {
+    position: "fixed", bottom: 20, right: 20, padding: "10px 16px",
+    background: "rgba(46, 125, 50, 0.9)", color: "white",
+    borderRadius: 8, fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+    zIndex: 9998, fontWeight: 600,
+  },
+  headerTop: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    gap: 16, width: "100%", position: "relative",
+  },
+  darkModeToggle: {
+    position: "absolute", right: 0, top: 0,
+    background: "rgba(255,255,255,0.1)", border: "2px solid rgba(212,175,55,0.3)",
+    borderRadius: "50%", width: 44, height: 44, fontSize: 20,
+    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "all 0.3s", padding: 0,
+  },
+  header: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 28, textAlign: "center", position: "relative" },
+  headerDark: {},
   logo: {
     maxWidth: 120, height: "auto", marginBottom: 12,
   },
@@ -539,6 +702,10 @@ const styles = {
   proofDone: { display: "flex", alignItems: "center", gap: 16 },
   proofThumb: { width: 64, height: 64, objectFit: "cover", borderRadius: 8, border: "2px solid #27ae60" },
 
+  unsavedIndicator: {
+    display: "inline-block", width: 8, height: 8, background: "#e67e22",
+    borderRadius: "50%", marginRight: 8,
+  },
   nav: { display: "flex", alignItems: "center", marginTop: 28, gap: 12 },
   btnPrimary: {
     padding: "12px 28px", background: "linear-gradient(135deg, #1a5c38, #14422a)",
