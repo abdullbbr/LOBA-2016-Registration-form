@@ -1,0 +1,165 @@
+/* Modern Reset & Base */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0f0f12;
+  color: #e8e8ed;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.97); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes checkmark {
+  from { transform: scale(0) rotate(-45deg); }
+  to { transform: scale(1) rotate(0deg); }
+}
+
+/* Input focus states */
+.modern-input:focus {
+  border-color: #c9a84c !important;
+  background: rgba(201, 161, 76, 0.04) !important;
+  box-shadow: 0 0 0 3px rgba(201, 161, 76, 0.12), 0 1px 3px rgba(0,0,0,0.2) !important;
+  outline: none;
+}
+
+.modern-input::placeholder {
+  color: #555;
+  font-weight: 400;
+}
+
+.modern-select:focus {
+  border-color: #c9a84c !important;
+  background: rgba(201, 161, 76, 0.04) !important;
+  box-shadow: 0 0 0 3px rgba(201, 161, 76, 0.12), 0 1px 3px rgba(0,0,0,0.2) !important;
+  outline: none;
+}
+
+.modern-textarea:focus {
+  border-color: #c9a84c !important;
+  background: rgba(201, 161, 76, 0.04) !important;
+  box-shadow: 0 0 0 3px rgba(201, 161, 76, 0.12), 0 1px 3px rgba(0,0,0,0.2) !important;
+  outline: none;
+}
+
+/* Button hover states */
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(201, 161, 76, 0.25) !important;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary:hover {
+  background: rgba(201, 161, 76, 0.08) !important;
+  border-color: #c9a84c !important;
+  color: #c9a84c !important;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(201, 161, 76, 0.35) !important;
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+/* Copy button hover */
+.copy-btn:hover {
+  background: rgba(201, 161, 76, 0.15) !important;
+  transform: translateY(-1px);
+}
+
+/* Photo upload hover */
+.photo-upload:hover {
+  border-color: #c9a84c !important;
+  background: rgba(201, 161, 76, 0.04) !important;
+}
+
+/* Proof upload hover */
+.proof-upload:hover {
+  border-color: #c9a84c !important;
+  background: rgba(201, 161, 76, 0.04) !important;
+}
+
+/* Step item hover */
+.step-item:hover .step-circle {
+  transform: scale(1.08);
+}
+
+/* Card entrance animation */
+.card-animate {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Success card animation */
+.success-animate {
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Toast animation */
+.toast-animate {
+  animation: slideDown 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a22;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Selection */
+::selection {
+  background: rgba(201, 161, 76, 0.3);
+  color: #fff;
+}
