@@ -67,7 +67,6 @@ export default function App() {
   const [animate, setAnimate] = useState(true);
   const [copied, setCopied] = useState("");
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-  const [darkMode, setDarkMode] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const fileRef = useRef();
@@ -266,7 +265,8 @@ export default function App() {
   }
 
   return (
-    <div style={{ ...styles.page, ...(darkMode ? styles.pageDark : {}) }}>
+    <div style={styles.page}>
+      <div style={styles.pageOverlay} />
       {/* Toast Notification */}
       {toast.show && (
         <div style={{
@@ -283,17 +283,11 @@ export default function App() {
         <div style={styles.autoSaveIndicator}>💾 Saving...</div>
       )}
 
-      <header style={{ ...styles.header, ...(darkMode ? styles.headerDark : {}) }}>
+      <header style={styles.header}>
         <div style={styles.headerTop}>
-          <img src="/logo.jpg" alt="School Logo" style={styles.logo} />
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            style={styles.darkModeToggle}
-            aria-label="Toggle dark mode"
-            title="Toggle dark mode"
-          >
-            {darkMode ? "☀️" : "🌙"}
-          </button>
+          <div style={styles.logoContainer}>
+            <img src="/logo.jpeg" alt="School Logo" style={styles.logo} />
+          </div>
         </div>
         <h1 style={styles.schoolName}>Science Secondary School</h1>
         <p style={styles.schoolSub}>Lautai, Gumel — Old Boys Registration Form 2016 Graduate</p>
@@ -572,14 +566,18 @@ function SelectField({ label, value, onChange, error, options, placeholder, ...p
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "linear-gradient(160deg, #0d2b1a 0%, #14422a 40%, #1a5c38 100%)",
+    background: "linear-gradient(135deg, #f5f7fa 0%, #e8eef5 50%, #f0f4f8 100%)",
     fontFamily: "'Merriweather', 'Georgia', serif",
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "24px 16px 40px",
-    transition: "background 0.3s ease",
+    position: "relative",
+    overflow: "hidden",
   },
-  pageDark: {
-    background: "linear-gradient(160deg, #0a1f14 0%, #0d2a1a 40%, #111f17 100%)",
+  pageOverlay: {
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+    backgroundImage: `radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(26, 60, 42, 0.05) 0%, transparent 50%)`,
+    pointerEvents: "none",
   },
   toast: {
     position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",
@@ -597,19 +595,18 @@ const styles = {
   },
   headerTop: {
     display: "flex", alignItems: "center", justifyContent: "center",
-    gap: 16, width: "100%", position: "relative",
+    gap: 16, width: "100%", position: "relative", zIndex: 1,
   },
-  darkModeToggle: {
-    position: "absolute", right: 0, top: 0,
-    background: "rgba(255,255,255,0.1)", border: "2px solid rgba(212,175,55,0.3)",
-    borderRadius: "50%", width: 44, height: 44, fontSize: 20,
-    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-    transition: "all 0.3s", padding: 0,
+  header: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 28, textAlign: "center", position: "relative", zIndex: 1 },
+  logoContainer: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    width: 140, height: 140, background: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 20, padding: 12, boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    border: "2px solid rgba(212, 175, 55, 0.3)", marginBottom: 16, backdropFilter: "blur(10px)",
   },
-  header: { display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 28, textAlign: "center", position: "relative" },
-  headerDark: {},
   logo: {
-    maxWidth: 120, height: "auto", marginBottom: 12,
+    maxWidth: "100%", height: "auto", maxHeight: "100%",
+    objectFit: "contain",
   },
   crest: {
     fontSize: 48, width: 72, height: 72, background: "rgba(255,255,255,0.12)",
@@ -617,116 +614,126 @@ const styles = {
     border: "2px solid rgba(212,175,55,0.5)", flexShrink: 0,
   },
   schoolName: {
-    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 22, fontWeight: 800,
-    color: "#d4af37", margin: 0, letterSpacing: 0.5, lineHeight: 1.2,
+    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 24, fontWeight: 800,
+    color: "#1a3a2a", margin: 0, letterSpacing: 0.5, lineHeight: 1.2,
   },
   schoolSub: {
-    fontSize: 13, color: "rgba(255,255,255,0.7)", margin: "4px 0 0",
+    fontSize: 13, color: "#5a7a6a", margin: "8px 0 0",
     fontFamily: "'DM Sans', sans-serif", letterSpacing: 1, textTransform: "uppercase",
   },
   stepper: {
     display: "flex", justifyContent: "center", gap: 14, marginBottom: 24,
-    position: "relative", padding: "0 4px", flexWrap: "wrap",
+    position: "relative", padding: "0 4px", flexWrap: "wrap", zIndex: 1,
   },
   stepItem: { display: "flex", flexDirection: "column", alignItems: "center", gap: 5, zIndex: 1, cursor: "pointer" },
   stepCircle: {
-    width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.1)",
-    border: "2px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center",
-    justifyContent: "center", fontSize: 15, color: "#aaa", transition: "all 0.3s",
+    width: 36, height: 36, borderRadius: "50%", background: "rgba(212,175,55,0.1)",
+    border: "2px solid #d4af37", display: "flex", alignItems: "center",
+    justifyContent: "center", fontSize: 15, color: "#1a3a2a", transition: "all 0.3s",
   },
   stepActive: { background: "#d4af37", border: "2px solid #d4af37", color: "#1a3a2a", boxShadow: "0 0 18px rgba(212,175,55,0.4)" },
   stepDone: { background: "rgba(212,175,55,0.2)", border: "2px solid #d4af37", color: "#d4af37" },
-  stepLabel: { fontSize: 9, color: "#ccc", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 },
-  stepLine: { position: "absolute", top: 18, left: "8%", right: "8%", height: 2, background: "rgba(255,255,255,0.1)", zIndex: 0 },
+  stepLabel: { fontSize: 9, color: "#3a5a4a", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 },
+  stepLine: { position: "absolute", top: 18, left: "8%", right: "8%", height: 2, background: "rgba(212,175,55,0.2)", zIndex: 0 },
   stepLineInner: { height: "100%", background: "#d4af37", transition: "width 0.5s ease", borderRadius: 2 },
   card: {
-    width: "100%", maxWidth: 580, background: "rgba(255,255,255,0.97)",
-    borderRadius: 16, padding: "32px 28px",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.35)", transition: "all 0.4s ease",
+    width: "100%", maxWidth: 580, background: "rgba(255,255,255,0.99)",
+    borderRadius: 18, padding: "42px 36px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.08)", transition: "all 0.4s ease", position: "relative", zIndex: 1,
+    border: "1px solid rgba(212, 175, 55, 0.15)",
   },
   sectionTitle: {
-    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 20, fontWeight: 700,
-    color: "#1a3a2a", marginBottom: 20, paddingBottom: 10, borderBottom: "2px solid #d4af37",
+    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 22, fontWeight: 700,
+    color: "#1a3a2a", marginBottom: 24, paddingBottom: 16, borderBottom: "2.5px solid #d4af37", letterSpacing: 0.3,
   },
-  row: { display: "flex", gap: 14, flexWrap: "wrap" },
+  row: { display: "flex", gap: 18, flexWrap: "wrap" },
   label: {
-    display: "block", fontSize: 12, fontWeight: 600, color: "#3a5a4a", marginTop: 14, marginBottom: 5,
-    fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.6,
+    display: "block", fontSize: 11, fontWeight: 700, color: "#1a3a2a", marginTop: 18, marginBottom: 8,
+    fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.8,
   },
   input: {
-    width: "100%", padding: "11px 14px", border: "1.5px solid #d0d8d3", borderRadius: 8,
+    width: "100%", padding: "13px 16px", border: "1.5px solid #d0d8d3", borderRadius: 10,
     fontSize: 15, fontFamily: "'DM Sans', 'Merriweather', serif", color: "#1a3a2a",
-    background: "#f8faf9", outline: "none", transition: "border 0.2s", boxSizing: "border-box",
+    background: "#f9fafb", outline: "none", transition: "all 0.3s ease", boxSizing: "border-box",
+    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
   },
   inputError: { borderColor: "#c0392b", background: "#fdf2f2" },
   select: {
     appearance: "none", cursor: "pointer",
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E")`,
-    backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center",
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a3a2a' stroke-width='1.5' fill='none'/%3E%3C/svg%3E")`,
+    backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", paddingRight: 36,
   },
   textarea: {
-    width: "100%", padding: "11px 14px", border: "1.5px solid #d0d8d3", borderRadius: 8,
+    width: "100%", padding: "13px 16px", border: "1.5px solid #d0d8d3", borderRadius: 10,
     fontSize: 15, fontFamily: "'DM Sans', 'Merriweather', serif", color: "#1a3a2a",
-    background: "#f8faf9", outline: "none", resize: "vertical", boxSizing: "border-box",
+    background: "#f9fafb", outline: "none", resize: "vertical", boxSizing: "border-box",
+    transition: "all 0.3s ease", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
   },
-  errText: { fontSize: 11, color: "#c0392b", marginTop: 3, display: "block", fontFamily: "'DM Sans', sans-serif" },
+  errText: { fontSize: 12, color: "#c0392b", marginTop: 5, display: "block", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 },
   photoRow: { display: "inline-flex", cursor: "pointer", marginTop: 4 },
   photoPlaceholder: {
-    width: 100, height: 110, background: "#eef3f0", border: "2px dashed #b8c8be",
-    borderRadius: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+    width: 110, height: 120, background: "#f0f3f2", border: "2px dashed #c8d5d0",
+    borderRadius: 12, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6,
+    transition: "all 0.3s ease",
   },
-  photoPreview: { width: 100, height: 110, objectFit: "cover", borderRadius: 10, border: "2px solid #d4af37" },
+  photoPreview: { width: 110, height: 120, objectFit: "cover", borderRadius: 12, border: "2px solid #d4af37", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" },
 
   /* Payment styles */
   duesBox: {
     display: "flex", alignItems: "center", justifyContent: "space-between",
-    background: "linear-gradient(135deg, #1a5c38, #14422a)", borderRadius: 12, padding: "18px 22px", marginBottom: 20,
+    background: "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.05) 100%)", borderRadius: 14, padding: "22px 26px", marginBottom: 24,
+    border: "1.5px solid rgba(212,175,55,0.25)",
   },
-  duesLabel: { fontSize: 14, color: "rgba(255,255,255,0.85)", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 },
-  duesAmount: { fontSize: 32, fontWeight: 900, color: "#d4af37", fontFamily: "'Playfair Display', serif" },
-  bankCard: { border: "1.5px solid #d0d8d3", borderRadius: 12, padding: 20, background: "#fafcfb", marginBottom: 16 },
-  bankHeader: { display: "flex", alignItems: "center", gap: 10, marginBottom: 16 },
-  bankTitle: { fontSize: 15, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif" },
-  bankRow: { padding: "8px 0" },
+  duesLabel: { fontSize: 13, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2 },
+  duesAmount: { fontSize: 36, fontWeight: 900, color: "#d4af37", fontFamily: "'Playfair Display', serif" },
+  bankCard: { border: "1.5px solid #d0d8d3", borderRadius: 14, padding: 24, background: "#fafbfc", marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" },
+  bankHeader: { display: "flex", alignItems: "center", gap: 12, marginBottom: 20 },
+  bankTitle: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3 },
+  bankRow: { padding: "12px 0" },
   bankLabel: { fontSize: 11, color: "#888", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.8, display: "block", marginBottom: 4 },
   bankValueRow: { display: "flex", alignItems: "center", justifyContent: "space-between" },
   bankValue: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif" },
   bankDivider: { height: 1, background: "#e8ede9" },
   copyBtn: {
-    background: "none", border: "1px solid #d4af37", borderRadius: 6, padding: "4px 12px",
+    background: "rgba(212, 175, 55, 0.08)", border: "1px solid #d4af37", borderRadius: 8, padding: "6px 14px",
     fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+    color: "#d4af37",
   },
-  payNote: { fontSize: 13, color: "#666", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, margin: "12px 0 4px" },
-  proofUpload: { border: "2px dashed #b8c8be", borderRadius: 12, padding: 20, cursor: "pointer", transition: "all 0.2s", marginTop: 4 },
-  proofEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "10px 0" },
-  proofDone: { display: "flex", alignItems: "center", gap: 16 },
-  proofThumb: { width: 64, height: 64, objectFit: "cover", borderRadius: 8, border: "2px solid #27ae60" },
+  payNote: { fontSize: 14, color: "#5a7a6a", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7, margin: "16px 0 8px", fontWeight: 500 },
+  proofUpload: { border: "2px dashed #c8d5d0", borderRadius: 14, padding: 24, cursor: "pointer", transition: "all 0.3s ease", marginTop: 8, background: "#fafbfc" },
+  proofEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "14px 0" },
+  proofDone: { display: "flex", alignItems: "center", gap: 18 },
+  proofThumb: { width: 72, height: 72, objectFit: "cover", borderRadius: 10, border: "2px solid #27ae60", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" },
 
   unsavedIndicator: {
     display: "inline-block", width: 8, height: 8, background: "#e67e22",
     borderRadius: "50%", marginRight: 8,
   },
-  nav: { display: "flex", alignItems: "center", marginTop: 28, gap: 12 },
+  nav: { display: "flex", alignItems: "center", marginTop: 32, gap: 14 },
   btnPrimary: {
-    padding: "12px 28px", background: "linear-gradient(135deg, #1a5c38, #14422a)",
+    padding: "14px 32px", background: "linear-gradient(135deg, #1a5c38, #14422a)",
     color: "#d4af37", fontWeight: 700, fontSize: 15, border: "none", borderRadius: 10,
-    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 4px 12px rgba(26, 60, 42, 0.2)",
+    transition: "all 0.3s ease",
   },
   btnSecondary: {
-    padding: "12px 22px", background: "transparent", color: "#1a5c38", fontWeight: 600,
+    padding: "14px 28px", background: "transparent", color: "#1a5c38", fontWeight: 600,
     fontSize: 14, border: "1.5px solid #1a5c38", borderRadius: 10, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+    transition: "all 0.3s ease",
   },
   btnSubmit: {
-    padding: "14px 32px", background: "linear-gradient(135deg, #d4af37, #b8942e)",
+    padding: "16px 36px", background: "linear-gradient(135deg, #d4af37, #b8942e)",
     color: "#1a3a2a", fontWeight: 800, fontSize: 16, border: "none", borderRadius: 10,
-    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 4px 18px rgba(212,175,55,0.4)",
+    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 6px 20px rgba(212,175,55,0.3)",
+    transition: "all 0.3s ease",
   },
   successCard: {
-    maxWidth: 480, background: "rgba(255,255,255,0.97)", borderRadius: 20,
-    padding: "48px 36px", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.35)", marginTop: 40,
+    maxWidth: 480, background: "rgba(255,255,255,0.99)", borderRadius: 20,
+    padding: "56px 42px", textAlign: "center", boxShadow: "0 8px 32px rgba(0,0,0,0.08)", marginTop: 40, position: "relative", zIndex: 1,
+    border: "1px solid rgba(212, 175, 55, 0.15)",
   },
   successIcon: { fontSize: 56, marginBottom: 12 },
   successTitle: { fontFamily: "'Playfair Display', serif", fontSize: 26, color: "#1a3a2a", margin: "0 0 12px" },
   successText: { fontSize: 15, color: "#3a5a4a", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" },
-  footer: { marginTop: 32, fontSize: 12, color: "rgba(255,255,255,0.4)", fontFamily: "'DM Sans', sans-serif", textAlign: "center" },
+  footer: { marginTop: 32, fontSize: 12, color: "#5a7a6a", fontFamily: "'DM Sans', sans-serif", textAlign: "center", position: "relative", zIndex: 1 },
 };
