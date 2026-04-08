@@ -510,7 +510,7 @@ export default function App() {
             </button>
           )}
         </div>
-        {submitError && <p style={{ color: "#c0392b", fontSize: 13, marginTop: 10, fontFamily: "'DM Sans', sans-serif" }}>{submitError}</p>}
+        {submitError && <p style={{ color: "#c0392b", fontSize: 13, marginTop: 10, fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", fontWeight: 500 }}>{submitError}</p>}
       </div>
 
       <footer style={styles.footer}>
@@ -567,7 +567,7 @@ const styles = {
   page: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #f5f7fa 0%, #e8eef5 50%, #f0f4f8 100%)",
-    fontFamily: "'Merriweather', 'Georgia', serif",
+    fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica', 'Arial', 'sans-serif'",
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "24px 16px 40px",
     position: "relative",
@@ -584,13 +584,13 @@ const styles = {
     padding: "14px 24px", borderRadius: 12, color: "white",
     display: "flex", alignItems: "center", zIndex: 9999,
     boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-    fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+    fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", fontSize: 14, fontWeight: 600,
     animation: "slideDown 0.3s ease",
   },
   autoSaveIndicator: {
     position: "fixed", bottom: 20, right: 20, padding: "10px 16px",
     background: "rgba(46, 125, 50, 0.9)", color: "white",
-    borderRadius: 8, fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+    borderRadius: 8, fontSize: 12, fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'",
     zIndex: 9998, fontWeight: 600,
   },
   headerTop: {
@@ -614,12 +614,12 @@ const styles = {
     border: "2px solid rgba(212,175,55,0.5)", flexShrink: 0,
   },
   schoolName: {
-    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 24, fontWeight: 800,
-    color: "#1a3a2a", margin: 0, letterSpacing: 0.5, lineHeight: 1.2,
+    fontFamily: "'Playfair Display', 'Georgia', 'serif'", fontSize: 28, fontWeight: 800,
+    color: "#1a3a2a", margin: 0, letterSpacing: 0.3, lineHeight: 1.3,
   },
   schoolSub: {
-    fontSize: 13, color: "#5a7a6a", margin: "8px 0 0",
-    fontFamily: "'DM Sans', sans-serif", letterSpacing: 1, textTransform: "uppercase",
+    fontSize: 13, color: "#5a7a6a", margin: "10px 0 0",
+    fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 500,
   },
   stepper: {
     display: "flex", justifyContent: "center", gap: 14, marginBottom: 24,
@@ -633,7 +633,7 @@ const styles = {
   },
   stepActive: { background: "#d4af37", border: "2px solid #d4af37", color: "#1a3a2a", boxShadow: "0 0 18px rgba(212,175,55,0.4)" },
   stepDone: { background: "rgba(212,175,55,0.2)", border: "2px solid #d4af37", color: "#d4af37" },
-  stepLabel: { fontSize: 9, color: "#3a5a4a", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.5 },
+  stepLabel: { fontSize: 9, color: "#3a5a4a", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 },
   stepLine: { position: "absolute", top: 18, left: "8%", right: "8%", height: 2, background: "rgba(212,175,55,0.2)", zIndex: 0 },
   stepLineInner: { height: "100%", background: "#d4af37", transition: "width 0.5s ease", borderRadius: 2 },
   card: {
@@ -643,19 +643,19 @@ const styles = {
     border: "1px solid rgba(212, 175, 55, 0.15)",
   },
   sectionTitle: {
-    fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: 22, fontWeight: 700,
-    color: "#1a3a2a", marginBottom: 24, paddingBottom: 16, borderBottom: "2.5px solid #d4af37", letterSpacing: 0.3,
+    fontFamily: "'Playfair Display', 'Georgia', 'serif'", fontSize: 24, fontWeight: 700,
+    color: "#1a3a2a", marginBottom: 24, paddingBottom: 16, borderBottom: "2.5px solid #d4af37", letterSpacing: 0.2,
   },
   row: { display: "flex", gap: 18, flexWrap: "wrap" },
   label: {
     display: "block", fontSize: 11, fontWeight: 700, color: "#1a3a2a", marginTop: 18, marginBottom: 8,
-    fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.8,
+    fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", textTransform: "uppercase", letterSpacing: 1, fontStyle: "normal",
   },
   input: {
     width: "100%", padding: "13px 16px", border: "1.5px solid #d0d8d3", borderRadius: 10,
-    fontSize: 15, fontFamily: "'DM Sans', 'Merriweather', serif", color: "#1a3a2a",
+    fontSize: 15, fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", color: "#1a3a2a",
     background: "#f9fafb", outline: "none", transition: "all 0.3s ease", boxSizing: "border-box",
-    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
+    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)", fontWeight: 500, lineHeight: 1.5,
   },
   inputError: { borderColor: "#c0392b", background: "#fdf2f2" },
   select: {
@@ -665,11 +665,11 @@ const styles = {
   },
   textarea: {
     width: "100%", padding: "13px 16px", border: "1.5px solid #d0d8d3", borderRadius: 10,
-    fontSize: 15, fontFamily: "'DM Sans', 'Merriweather', serif", color: "#1a3a2a",
+    fontSize: 15, fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", color: "#1a3a2a",
     background: "#f9fafb", outline: "none", resize: "vertical", boxSizing: "border-box",
-    transition: "all 0.3s ease", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
+    transition: "all 0.3s ease", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)", fontWeight: 500, lineHeight: 1.6,
   },
-  errText: { fontSize: 12, color: "#c0392b", marginTop: 5, display: "block", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 },
+  errText: { fontSize: 12, color: "#c0392b", marginTop: 5, display: "block", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", fontWeight: 500 },
   photoRow: { display: "inline-flex", cursor: "pointer", marginTop: 4 },
   photoPlaceholder: {
     width: 110, height: 120, background: "#f0f3f2", border: "2px dashed #c8d5d0",
@@ -684,22 +684,22 @@ const styles = {
     background: "linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.05) 100%)", borderRadius: 14, padding: "22px 26px", marginBottom: 24,
     border: "1.5px solid rgba(212,175,55,0.25)",
   },
-  duesLabel: { fontSize: 13, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2 },
-  duesAmount: { fontSize: 36, fontWeight: 900, color: "#d4af37", fontFamily: "'Playfair Display', serif" },
+  duesLabel: { fontSize: 13, color: "#1a3a2a", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2 },
+  duesAmount: { fontSize: 36, fontWeight: 800, color: "#d4af37", fontFamily: "'Playfair Display', 'Georgia', 'serif'", letterSpacing: -0.5 },
   bankCard: { border: "1.5px solid #d0d8d3", borderRadius: 14, padding: 24, background: "#fafbfc", marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" },
   bankHeader: { display: "flex", alignItems: "center", gap: 12, marginBottom: 20 },
-  bankTitle: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3 },
+  bankTitle: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", letterSpacing: 0.3 },
   bankRow: { padding: "12px 0" },
-  bankLabel: { fontSize: 11, color: "#888", fontFamily: "'DM Sans', sans-serif", textTransform: "uppercase", letterSpacing: 0.8, display: "block", marginBottom: 4 },
+  bankLabel: { fontSize: 11, color: "#888", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", textTransform: "uppercase", letterSpacing: 0.8, display: "block", marginBottom: 4, fontWeight: 600 },
   bankValueRow: { display: "flex", alignItems: "center", justifyContent: "space-between" },
-  bankValue: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'DM Sans', sans-serif" },
+  bankValue: { fontSize: 16, fontWeight: 700, color: "#1a3a2a", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'" },
   bankDivider: { height: 1, background: "#e8ede9" },
   copyBtn: {
     background: "rgba(212, 175, 55, 0.08)", border: "1px solid #d4af37", borderRadius: 8, padding: "6px 14px",
-    fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
-    color: "#d4af37",
+    fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", transition: "all 0.2s",
+    color: "#d4af37", letterSpacing: 0.3,
   },
-  payNote: { fontSize: 14, color: "#5a7a6a", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7, margin: "16px 0 8px", fontWeight: 500 },
+  payNote: { fontSize: 14, color: "#5a7a6a", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", lineHeight: 1.7, margin: "16px 0 8px", fontWeight: 500 },
   proofUpload: { border: "2px dashed #c8d5d0", borderRadius: 14, padding: 24, cursor: "pointer", transition: "all 0.3s ease", marginTop: 8, background: "#fafbfc" },
   proofEmpty: { display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "14px 0" },
   proofDone: { display: "flex", alignItems: "center", gap: 18 },
@@ -713,19 +713,19 @@ const styles = {
   btnPrimary: {
     padding: "14px 32px", background: "linear-gradient(135deg, #1a5c38, #14422a)",
     color: "#d4af37", fontWeight: 700, fontSize: 15, border: "none", borderRadius: 10,
-    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 4px 12px rgba(26, 60, 42, 0.2)",
-    transition: "all 0.3s ease",
+    cursor: "pointer", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", letterSpacing: 0.5, boxShadow: "0 4px 12px rgba(26, 60, 42, 0.2)",
+    transition: "all 0.3s ease", lineHeight: 1.4,
   },
   btnSecondary: {
     padding: "14px 28px", background: "transparent", color: "#1a5c38", fontWeight: 600,
-    fontSize: 14, border: "1.5px solid #1a5c38", borderRadius: 10, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-    transition: "all 0.3s ease",
+    fontSize: 14, border: "1.5px solid #1a5c38", borderRadius: 10, cursor: "pointer", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'",
+    transition: "all 0.3s ease", letterSpacing: 0.2,
   },
   btnSubmit: {
     padding: "16px 36px", background: "linear-gradient(135deg, #d4af37, #b8942e)",
     color: "#1a3a2a", fontWeight: 800, fontSize: 16, border: "none", borderRadius: 10,
-    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.5, boxShadow: "0 6px 20px rgba(212,175,55,0.3)",
-    transition: "all 0.3s ease",
+    cursor: "pointer", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", letterSpacing: 0.5, boxShadow: "0 6px 20px rgba(212,175,55,0.3)",
+    transition: "all 0.3s ease", lineHeight: 1.4,
   },
   successCard: {
     maxWidth: 480, background: "rgba(255,255,255,0.99)", borderRadius: 20,
@@ -733,7 +733,7 @@ const styles = {
     border: "1px solid rgba(212, 175, 55, 0.15)",
   },
   successIcon: { fontSize: 56, marginBottom: 12 },
-  successTitle: { fontFamily: "'Playfair Display', serif", fontSize: 26, color: "#1a3a2a", margin: "0 0 12px" },
-  successText: { fontSize: 15, color: "#3a5a4a", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" },
-  footer: { marginTop: 32, fontSize: 12, color: "#5a7a6a", fontFamily: "'DM Sans', sans-serif", textAlign: "center", position: "relative", zIndex: 1 },
+  successTitle: { fontFamily: "'Playfair Display', 'Georgia', 'serif'", fontSize: 26, color: "#1a3a2a", margin: "0 0 12px", fontWeight: 700, letterSpacing: -0.3 },
+  successText: { fontSize: 15, color: "#3a5a4a", lineHeight: 1.8, fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", fontWeight: 500 },
+  footer: { marginTop: 32, fontSize: 12, color: "#5a7a6a", fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'", textAlign: "center", position: "relative", zIndex: 1, fontWeight: 500, letterSpacing: 0.2 },
 };
