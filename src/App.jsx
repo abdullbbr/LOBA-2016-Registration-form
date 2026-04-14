@@ -33,7 +33,7 @@ const initialForm = {
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvG8vqIiwrhV82cgzQ60bZLMQ9aJbKByNtaS9dev1Ev1Bnkrj4iOzhBQ-MNzt6ZA/exec";
 
-const BANK = { name: "Opay ", accountName: "Salisu Habibu Babura", accountNumber: "8039912121", dues: "300" };
+const BANK = { name: "Opay ", accountName: "Salisu Habibu Babura", accountNumber: "8039912121", dues: "500" };
 
 const compressImage = (file, callback, quality = 0.7, maxWidth = 800, maxHeight = 600) => {
   const reader = new FileReader();
