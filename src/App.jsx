@@ -31,7 +31,7 @@ const initialForm = {
   achievements: "", interests: "", message: ""
 };
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvG8vqIiwrhV82cgzQ60bZLMQ9aJbKByNtaS9dev1Ev1Bnkrj4iOzhBQ-MNzt6ZA/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVRdzn_UDmH7WjIbEhUe6T__XEZgNRYXu-Rtpd9zIkCBIf37BWX8482c2IYDwWZk8t/exec";
 
 const BANK = { name: "Opay ", accountName: "Salisu Habibu Babura", accountNumber: "8039912121", dues: "500" };
 
